@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Item Manager</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            margin-top: 20px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #4facfe;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #00c6ff;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow: auto;
+        }
+		.product-card {
+		    margin-top: 15px;
+		    padding: 20px;
+		    border-radius: 12px;
+		    background: #ffffff;
+		    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+		    text-align: left;
+		}
+
+		.product-title {
+		    font-size: 20px;
+		    font-weight: bold;
+		    margin-bottom: 8px;
+		}
+
+		.product-desc {
+		    color: #555;
+		    margin-bottom: 10px;
+		}
+
+		.product-price {
+		    color: #2e7d32;
+		    font-size: 18px;
+		    font-weight: bold;
+		}
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Add Item</h2>
+
+    <input id="name" placeholder="Name">
+    <input id="description" placeholder="Description">
+    <input id="price" placeholder="Price">
+
+    <button onclick="addItem()">Add Item</button>
+
+    <h2>Get Item By ID</h2>
+
+    <input id="itemId" placeholder="Enter ID">
+    <button onclick="getItem()">Get Item</button>
+
+    <h3>Result</h3>
+    <pre id="result"></pre>
+
+</div>
+
+<script>
+	function addItem() {
+
+	    let priceValue = document.getElementById("price").value;
+
+	    // remove commas like 70,000 -> 70000
+	    priceValue = priceValue.replace(/,/g, '');
+
+	    const item = {
+	        name: document.getElementById("name").value,
+	        description: document.getElementById("description").value,
+	        price: parseFloat(priceValue)
+	    };
+
+	    fetch('/api/items', {
+	        method: 'POST',
+	        headers: { 'Content-Type': 'application/json' },
+	        body: JSON.stringify(item)
+	    })
+	    .then(res => {
+	        if (res.ok) {
+	            document.getElementById("result").textContent = "Item added successfully";
+
+	            // clear fields
+	            document.getElementById("name").value = "";
+	            document.getElementById("description").value = "";
+	            document.getElementById("price").value = "";
+	        } else {
+	            document.getElementById("result").textContent = "Failed to add item";
+	        }
+	    });
+	}
+
+	function getItem() {
+	    const id = document.getElementById("itemId").value;
+
+	    fetch('/api/items/' + id)
+	    .then(res => res.json())
+	    .then(data => {
+
+	        document.getElementById("result").innerHTML = `
+	            <div class="product-card">
+	                <div class="product-title">${data.name}</div>
+	                <div class="product-desc">${data.description}</div>
+	                <div class="product-price">₹ ${Number(data.price).toLocaleString('en-IN')}</div>
+	            </div>
+	        `;
+	    });
+	}
+
+</script>
+
+</body>
+</html>
